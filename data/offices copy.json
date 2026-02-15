@@ -1,0 +1,69 @@
+{
+  "offices": [
+    {
+      "id": "BPN001",
+      "name": "Kantor Wilayah BPN Provinsi Aceh",
+      "address": "Lamgugob, Jl. Teuku Nyak Arief, Lamgugob, Aceh 24415",
+      "city": "Kota Banda Aceh",
+      "province": "Aceh",
+      "latitude": 5.576359,
+      "longitude": 95.355722,
+      "phone": "(0651)7551708",
+      "email": "-@bpn.go.id",
+      "type": "Kanwil",
+      "description": "Kantor Wilayah BPN Provinsi Aceh Republik Indonesia"
+    },
+    {
+      "id": "BPN002",
+      "name": "Kantor Wilayah BPN Jawa Barat",
+      "address": "Jl. LLRE Martadinata No. 153",
+      "city": "Bandung",
+      "province": "Jawa Barat",
+      "latitude": -6.912024,
+      "longitude": 107.619125,
+      "phone": "(022) 4203328",
+      "email": "kanwil.jabar@bpn.go.id",
+      "type": "Kanwil",
+      "description": "Kantor Wilayah BPN Provinsi Jawa Barat"
+    },
+    {
+      "id": "BPN003",
+      "name": "Kantor Pertanahan Kota Bandung",
+      "address": "Jl. Aceh No. 53",
+      "city": "Bandung",
+      "province": "Jawa Barat",
+      "latitude": -6.9125,
+      "longitude": 107.6206,
+      "phone": "(022) 4205678",
+      "email": "kantah.bandung@bpn.go.id",
+      "type": "Kantah",
+      "description": "Kantor Pertanahan Kota Bandung"
+    },
+    {
+      "id": "BPN004",
+      "name": "Kantor Pertanahan Kota Jakarta Pusat",
+      "address": "Jl. Kramat Raya No. 132",
+      "city": "Jakarta Pusat",
+      "province": "DKI Jakarta",
+      "latitude": -6.186486,
+      "longitude": 106.834091,
+      "phone": "(021) 31907445",
+      "email": "kantah.jakpus@bpn.go.id",
+      "type": "Kantah",
+      "description": "Kantor Pertanahan Kota Jakarta Pusat"
+    },
+    {
+      "id": "BPN006",
+      "name": "Kantor Pusat BPN",
+      "address": "Jl. Sisingamangaraja No. 2, Kebayoran Baru",
+      "city": "Jakarta Selatan",
+      "province": "DKI Jakarta",
+      "latitude": -6.226595,
+      "longitude": 106.802216,
+      "phone": "(021) 7393939",
+      "email": "pusat@bpn.go.id",
+      "type": "Pusat",
+      "description": "Kantor Pusat Badan Pertanahan Nasional Republik Indonesia"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+RewriteEngine On
+RewriteBase /
+
+# JANGAN redirect file-file assets (CSS, JS, images, fonts)
+RewriteCond %{REQUEST_URI} !\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
+
+# JANGAN redirect file-file yang benar-benar ada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Hanya redirect yang bukan file fisik
+RewriteRule ^(.*)$ index.php?path=$1 [L,QSA]
+
+# Proteksi direktori sensitif
+RedirectMatch 403 ^/config/?$
+RedirectMatch 403 ^/data/?$
+
+# Cegah akses ke file tertentu
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Blok akses ke file JSON
+<Files "*.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Blok semua file PHP secara default
+<Files "*.php">
+    Order allow,deny
+    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</Files>
+
+# Izinkan file PHP tertentu
+<FilesMatch "^(index|home|about|admin)\.php$">
+    Order allow,deny
+    Allow from all
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</FilesMatch>
+
+# Atau alternatif yang lebih sederhana (pilih salah satu):
+# Izinkan SEMUA file PHP (untuk development, TIDAK disarankan untuk production)
+# <Files "*.php">
+#    Order allow,deny
+#    Allow from all
+#    <IfModule mod_authz_core.c>
+#        Require all granted
+#    </IfModule>
+# </Files>
