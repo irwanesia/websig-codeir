@@ -1,0 +1,16 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swo
+*.swp
+
+# Project specific
+_site/
+node_modules/
+
+# Logs
+*.log
