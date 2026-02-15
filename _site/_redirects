@@ -1,0 +1,13 @@
+# Redirect rules untuk Netlify
+/ /index.html 200
+/* /index.html 200
+
+# Caching headers
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/data/*.json
+  Cache-Control: public, max-age=0, must-revalidate

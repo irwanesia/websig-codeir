@@ -1,0 +1,98 @@
+
+Warning: session_start(): Session cannot be started after headers have already been sent in /home/irwan/Projects/multi-docker/sig-bpn/admin.php on line 3
+
+Warning: Undefined array key "REQUEST_METHOD" in /home/irwan/Projects/multi-docker/sig-bpn/admin.php on line 16
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none"><i class="bi bi-house-door me-1"></i>Beranda</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Admin Data Kantor</li>
+        </ol>
+    </nav>
+
+    
+            <!-- Login Form -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h4 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Login Admin</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label class="form-label"><i class="bi bi-person me-2"></i>Username</label>
+                                <input type="text" name="username" class="form-control" required placeholder="admin">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label"><i class="bi bi-key me-2"></i>Password</label>
+                                <input type="password" name="password" class="form-control" required placeholder="bpn2026">
+                                <small class="text-muted">Gunakan username: admin, password: bpn2026</small>
+                            </div>
+                            <button type="submit" name="login" class="btn btn-primary w-100 py-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Delete Form (hidden) -->
+<form method="POST" id="deleteForm" style="display: none;">
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="id" id="deleteId">
+</form>
+
+<script>
+function editOffice(office) {
+    // Ubah action menjadi edit
+    document.getElementById('formAction').value = 'edit';
+    document.getElementById('officeId').value = office.id;
+    
+    // Isi form dengan data yang ada
+    document.getElementById('name').value = office.name;
+    document.getElementById('type').value = office.type;
+    document.getElementById('address').value = office.address;
+    document.getElementById('city').value = office.city;
+    document.getElementById('province').value = office.province;
+    document.getElementById('latitude').value = office.latitude;
+    document.getElementById('longitude').value = office.longitude;
+    document.getElementById('phone').value = office.phone || '';
+    document.getElementById('email').value = office.email || '';
+    document.getElementById('description').value = office.description || '';
+    
+    // Ubah tombol submit
+    document.getElementById('submitBtn').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Update Data';
+    document.getElementById('submitBtn').className = 'btn btn-warning';
+    
+    // Tampilkan tombol batal
+    document.getElementById('cancelEdit').style.display = 'inline-block';
+    
+    // Scroll ke form
+    document.getElementById('officeForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetForm() {
+    // Reset form ke mode tambah
+    document.getElementById('formAction').value = 'add';
+    document.getElementById('officeId').value = '';
+    document.getElementById('officeForm').reset();
+    
+    // Reset tombol
+    document.getElementById('submitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data';
+    document.getElementById('submitBtn').className = 'btn btn-success';
+    document.getElementById('cancelEdit').style.display = 'none';
+}
+
+function deleteOffice(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+        document.getElementById('deleteId').value = id;
+        document.getElementById('deleteForm').submit();
+    }
+}
+</script>
+

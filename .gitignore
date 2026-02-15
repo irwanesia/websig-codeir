@@ -9,7 +9,7 @@ Thumbs.db
 *.swp
 
 # Project specific
-_site/
+# _site/
 node_modules/
 
 # Logs
