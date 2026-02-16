@@ -402,5 +402,255 @@
             });
         });
     </script>
+
+    <script>
+        // ============================================
+        // FUNGSI MENAMPILKAN DETAIL KANTOR DI MODAL
+        // ============================================
+        window.showOfficeDetails = function (office) {
+        console.log("showOfficeDetails dipanggil dengan:", office);
+
+        // 🔴 YANG PALING PENTING: SIMPAN OFFICE YANG DIPILIH
+        window.selectedOfficeForRoute = office;
+
+        // Isi data modal
+        const titleEl = document.getElementById("officeModalTitle");
+        const addressEl = document.getElementById("officeAddress");
+        const phoneEl = document.getElementById("officePhone");
+        const emailEl = document.getElementById("officeEmail");
+        const hoursEl = document.getElementById("officeHours");
+
+        if (titleEl) titleEl.textContent = office.name || "-";
+        if (addressEl) addressEl.textContent = office.address || "-";
+        if (phoneEl) phoneEl.textContent = office.phone || "-";
+        if (emailEl) emailEl.textContent = office.email || "-";
+        if (hoursEl) hoursEl.textContent = office.jam_operasional || "08:00 - 16:00";
+
+        // Hapus mini map lama jika ada
+        if (window.miniMap) {
+            window.miniMap.remove();
+            window.miniMap = null;
+        }
+
+        // Buat mini map baru
+        setTimeout(() => {
+            const miniMapDiv = document.getElementById("officeMiniMap");
+            if (miniMapDiv && office.latitude && office.longitude) {
+            window.miniMap = L.map("officeMiniMap").setView(
+                [office.latitude, office.longitude],
+                15,
+            );
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap",
+            }).addTo(window.miniMap);
+
+            L.marker([office.latitude, office.longitude])
+                .addTo(window.miniMap)
+                .bindPopup(office.name)
+                .openPopup();
+            }
+        }, 200);
+
+        // Tampilkan modal
+        const modalElement = document.getElementById("officeModal");
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+
+        // Log untuk verifikasi
+        console.log(
+            "✅ selectedOfficeForRoute setelah disimpan:",
+            window.selectedOfficeForRoute,
+        );
+        };
+
+        // ============================================
+        // FUNGSI HANDLE RUTE
+        // ============================================
+        window.handleModalRouteClick = function () {
+        console.log("handleModalRouteClick dipanggil");
+        console.log("Isi selectedOfficeForRoute:", window.selectedOfficeForRoute);
+
+        // Cek apakah ada office yang dipilih
+        if (!window.selectedOfficeForRoute) {
+            alert("❌ Pilih kantor terlebih dahulu dengan mengklik MARKER di peta!");
+            return;
+        }
+
+        const office = window.selectedOfficeForRoute;
+        console.log("✅ Membuka rute ke:", office.name);
+
+        // Cek geolocation
+        if (!navigator.geolocation) {
+            alert("Geolocation tidak didukung");
+            window.open(
+            `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`,
+            "_blank",
+            );
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            const url = `https://www.openstreetmap.org/directions?engine=graphhopper_foot&route=${userLat},${userLng};${office.latitude},${office.longitude}`;
+            console.log("Membuka URL:", url);
+            window.open(url, "_blank");
+            },
+            function (error) {
+            console.error("Geolocation error:", error);
+            alert("Gagal mendapatkan lokasi. Membuka peta kantor.");
+            window.open(
+                `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`,
+                "_blank",
+            );
+            },
+        );
+        };
+
+        // Di fungsi pembuatan marker
+        function addOfficeMarker(office) {
+        const marker = L.marker([office.latitude, office.longitude]).addTo(map);
+
+        marker.on("click", function () {
+            console.log("Marker diklik:", office.name);
+            window.showOfficeDetails(office); // 🔴 PANGGIL FUNGSI INI
+        });
+
+        return marker;
+        }
+
+    </script>
+
+<!-- get current location -->
+    <script>
+
+        // Get current location
+        // ============================================
+        // FUNGSI GET CURRENT LOCATION - VERSI OPTIMAL
+        // ============================================
+        window.getCurrentLocation = function () {
+          console.log("getCurrentLocation dipanggil");
+
+          if (!navigator.geolocation) {
+            alert("Geolocation tidak didukung oleh browser Anda.");
+            return;
+          }
+
+          // Tampilkan loading indicator
+          const locateBtn = document.getElementById("locateBtn");
+          const originalHtml = locateBtn ? locateBtn.innerHTML : "";
+          if (locateBtn) {
+            locateBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm"></span>';
+            locateBtn.disabled = true;
+          }
+
+          // Opsi untuk mendapatkan lokasi AKURAT
+          const options = {
+            enableHighAccuracy: true, // PAKSA GPS, bukan WiFi/IP [citation:1][citation:8]
+            timeout: 10000, // Tunggu maksimal 10 detik [citation:4]
+            maximumAge: 0, // Jangan pakai cache, selalu baru [citation:2]
+          };
+
+          navigator.geolocation.getCurrentPosition(
+            // SUCCESS CALLBACK
+            function (position) {
+              console.log("Lokasi ditemukan:", position);
+
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
+              const accuracy = position.coords.accuracy; // Akurasi dalam meter
+
+              console.log(
+                `Koordinat: ${latitude}, ${longitude}, Akurasi: ${accuracy}m`,
+              );
+
+              // Reset button
+              if (locateBtn) {
+                locateBtn.innerHTML = originalHtml;
+                locateBtn.disabled = false;
+              }
+
+              // Hapus marker lama
+              if (window.currentLocationMarker) {
+                map.removeLayer(window.currentLocationMarker);
+              }
+              if (window.currentAccuracyCircle) {
+                map.removeLayer(window.currentAccuracyCircle);
+              }
+
+              // BUAT LINGKARAN AKURASI - biar tahu seberapa akurat [citation:1]
+              window.currentAccuracyCircle = L.circle([latitude, longitude], {
+                radius: accuracy, // Radius = akurasi dalam meter
+                color: "#3388ff",
+                weight: 1,
+                fillColor: "#3388ff",
+                fillOpacity: 0.1,
+              }).addTo(map);
+
+              // BUAT MARKER LOKASI
+              window.currentLocationMarker = L.marker([latitude, longitude], {
+                icon: L.divIcon({
+                  className: "current-location-marker",
+                  html: '<div style="width: 20px; height: 20px; background-color: #4285F4; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(66,133,244,0.5);"></div>',
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10],
+                }),
+              })
+                .addTo(map)
+                .bindPopup(
+                  `Lokasi Anda Saat Ini<br><small>Akurasi: ${accuracy} meter</small>`,
+                )
+                .openPopup();
+
+              // TAMPILKAN PERINGATAN JIKA AKURASI BURUK [citation:1]
+              if (accuracy > 100) {
+                alert(
+                  `Akurasi lokasi rendah (${accuracy}m). Pastikan GPS aktif dan Anda di luar ruangan.`,
+                );
+              }
+
+              // Pusatkan peta ke lokasi
+              map.setView([latitude, longitude], 15);
+            },
+
+            // ERROR CALLBACK
+            function (error) {
+              console.error("Geolocation error:", error);
+
+              // Reset button
+              if (locateBtn) {
+                locateBtn.innerHTML = originalHtml;
+                locateBtn.disabled = false;
+              }
+
+              let errorMessage = "Tidak dapat mendapatkan lokasi Anda: ";
+              switch (error.code) {
+                case error.PERMISSION_DENIED:
+                  errorMessage +=
+                    "Izin lokasi ditolak. Izinkan akses lokasi di browser.";
+                  break;
+                case error.POSITION_UNAVAILABLE:
+                  errorMessage += "Informasi lokasi tidak tersedia. Nyalakan GPS.";
+                  break;
+                case error.TIMEOUT:
+                  errorMessage +=
+                    "Waktu permintaan lokasi habis. Coba di tempat dengan sinyal lebih baik.";
+                  break;
+                default:
+                  errorMessage += error.message;
+              }
+
+              alert(errorMessage);
+            },
+            options, // PAKAI OPTIONS YANG SUDAH DISET
+          );
+        };
+
+    </script>
 </body>
 </html>

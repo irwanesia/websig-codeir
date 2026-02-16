@@ -1,4 +1,9 @@
 // Main JavaScript for BPN WebGIS
+// ============================================
+// PASTIKAN VARIABEL GLOBAL - LETAKKAN DI PALING ATAS
+// ============================================
+window.selectedOfficeForRoute = null;
+window.miniMap = null;
 
 let map;
 let officeMarkers = [];
@@ -6,6 +11,135 @@ let currentLocationMarker;
 let officeData = [];
 let visibleOffices = [];
 let mapLayers = {};
+
+// ============================================
+// FUNGSI MENAMPILKAN DETAIL KANTOR DI MODAL
+// ============================================
+window.showOfficeDetails = function (office) {
+  console.log("showOfficeDetails dipanggil dengan:", office);
+  console.log("Office name:", office?.name);
+  console.log("Office address:", office?.address);
+
+  // 🔴 YANG PALING PENTING: SIMPAN OFFICE YANG DIPILIH
+  window.selectedOfficeForRoute = office;
+
+  // Verifikasi penyimpanan
+  console.log(
+    "✅ selectedOfficeForRoute setelah disimpan:",
+    window.selectedOfficeForRoute,
+  );
+
+  // Isi data modal
+  const titleEl = document.getElementById("officeModalTitle");
+  const addressEl = document.getElementById("officeAddress");
+  const phoneEl = document.getElementById("officePhone");
+  const emailEl = document.getElementById("officeEmail");
+  const hoursEl = document.getElementById("officeHours");
+
+  if (titleEl) titleEl.textContent = office.name || "-";
+  if (addressEl) addressEl.textContent = office.address || "-";
+  if (phoneEl) phoneEl.textContent = office.phone || "-";
+  if (emailEl) emailEl.textContent = office.email || "-";
+  if (hoursEl) hoursEl.textContent = office.jam_operasional || "08:00 - 16:00";
+
+  // Hapus mini map lama jika ada
+  if (window.miniMap) {
+    window.miniMap.remove();
+    window.miniMap = null;
+  }
+
+  // Buat mini map baru
+  setTimeout(() => {
+    const miniMapDiv = document.getElementById("officeMiniMap");
+    if (miniMapDiv && office.latitude && office.longitude) {
+      console.log("Membuat mini map untuk:", office.latitude, office.longitude);
+      window.miniMap = L.map("officeMiniMap").setView(
+        [office.latitude, office.longitude],
+        15,
+      );
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap",
+      }).addTo(window.miniMap);
+
+      L.marker([office.latitude, office.longitude])
+        .addTo(window.miniMap)
+        .bindPopup(office.name)
+        .openPopup();
+    } else {
+      console.warn("Mini map gagal dibuat:", { miniMapDiv, office });
+    }
+  }, 200);
+
+  // Tampilkan modal
+  const modalElement = document.getElementById("officeModal");
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  } else {
+    console.error("Modal element tidak ditemukan!");
+  }
+};
+
+// ============================================
+// FUNGSI HANDLE RUTE
+// ============================================
+// window.handleModalRouteClick = function () {
+//   console.log("handleModalRouteClick dipanggil");
+//   console.log("Isi selectedOfficeForRoute:", window.selectedOfficeForRoute);
+
+//   // Cek apakah ada office yang dipilih
+//   if (!window.selectedOfficeForRoute) {
+//     alert("❌ Pilih kantor terlebih dahulu dengan mengklik MARKER di peta!");
+//     return;
+//   }
+
+//   const office = window.selectedOfficeForRoute;
+//   console.log("✅ Membuka rute ke:", office.name);
+
+//   // Cek geolocation
+//   if (!navigator.geolocation) {
+//     alert("Geolocation tidak didukung");
+//     window.open(
+//       `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`,
+//       "_blank",
+//     );
+//     return;
+//   }
+
+//   navigator.geolocation.getCurrentPosition(
+//     function (position) {
+//       const userLat = position.coords.latitude;
+//       const userLng = position.coords.longitude;
+
+//       const url = `https://www.openstreetmap.org/directions?engine=graphhopper_foot&route=${userLat},${userLng};${office.latitude},${office.longitude}`;
+//       console.log("Membuka URL:", url);
+//       window.open(url, "_blank");
+//     },
+//     function (error) {
+//       console.error("Geolocation error:", error);
+//       alert("Gagal mendapatkan lokasi. Membuka peta kantor.");
+//       window.open(
+//         `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`,
+//         "_blank",
+//       );
+//     },
+//   );
+// };
+
+// ============================================
+// PASTIKAN MARKER MENGGUNAKAN FUNGSI GLOBAL
+// ============================================
+// Fungsi addOfficeMarker yang sudah benar (tidak perlu diubah)
+function addOfficeMarker(office) {
+  // ... kode yang sudah ada ...
+
+  marker.on("click", function () {
+    console.log("Marker diklik:", office.name);
+    window.showOfficeDetails(office);
+  });
+
+  return marker;
+}
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
@@ -355,6 +489,139 @@ function setupMapControls() {
     });
   }
 }
+
+// tombol route modal
+// Variabel global untuk menyimpan office yang dipilih
+let selectedOfficeForRoute = null;
+
+// Fungsi untuk menampilkan detail office (update bagian ini)
+function showOfficeDetails(office) {
+  // Simpan office yang dipilih
+  selectedOfficeForRoute = office;
+
+  // Isi data di modal
+  document.getElementById("officeModalTitle").textContent = office.name;
+  document.getElementById("officeAddress").textContent = office.address || "-";
+  document.getElementById("officePhone").textContent = office.phone || "-";
+  document.getElementById("officeEmail").textContent = office.email || "-";
+  document.getElementById("officeHours").textContent =
+    office.jam_operasional || "08:00 - 16:00";
+
+  // Initialize mini map
+  setTimeout(() => {
+    if (window.miniMap) {
+      window.miniMap.remove();
+    }
+
+    window.miniMap = L.map("officeMiniMap").setView(
+      [office.latitude, office.longitude],
+      15,
+    );
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap",
+    }).addTo(window.miniMap);
+
+    L.marker([office.latitude, office.longitude])
+      .addTo(window.miniMap)
+      .bindPopup(office.name)
+      .openPopup();
+  }, 200);
+
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById("officeModal"));
+  modal.show();
+}
+
+// Fungsi untuk tombol route di modal
+function handleModalRoute() {
+  if (!selectedOfficeForRoute) {
+    alert("Pilih kantor terlebih dahulu!");
+    return;
+  }
+
+  // Dapatkan lokasi user
+  if (!navigator.geolocation) {
+    alert("Geolocation tidak didukung browser Anda");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      // Buka Google Maps atau OpenStreetMap untuk navigasi
+      const office = selectedOfficeForRoute;
+      const url = `https://www.openstreetmap.org/directions?engine=graphhopper_foot&route=${userLat},${userLng};${office.latitude},${office.longitude}`;
+
+      // Buka di tab baru
+      window.open(url, "_blank");
+    },
+    (error) => {
+      alert("Tidak dapat mendapatkan lokasi Anda: " + error.message);
+      // Fallback: buka rute tanpa lokasi user
+      const office = selectedOfficeForRoute;
+      const url = `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`;
+      window.open(url, "_blank");
+    },
+  );
+}
+
+// Fungsi untuk tombol route di map controls
+function handleMapRoute() {
+  if (!selectedOfficeForRoute) {
+    alert("Pilih kantor terlebih dahulu dengan mengklik marker di peta!");
+    return;
+  }
+
+  // Sama seperti di atas
+  if (!navigator.geolocation) {
+    alert("Geolocation tidak didukung browser Anda");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+      const office = selectedOfficeForRoute;
+      const url = `https://www.openstreetmap.org/directions?engine=graphhopper_foot&route=${userLat},${userLng};${office.latitude},${office.longitude}`;
+      window.open(url, "_blank");
+    },
+    (error) => {
+      alert("Tidak dapat mendapatkan lokasi Anda: " + error.message);
+      const office = selectedOfficeForRoute;
+      const url = `https://www.openstreetmap.org/?mlat=${office.latitude}&mlon=${office.longitude}#map=15/${office.latitude}/${office.longitude}`;
+      window.open(url, "_blank");
+    },
+  );
+}
+
+// Setup event listeners
+document.addEventListener("DOMContentLoaded", function () {
+  // Tombol route di map controls
+  const mapRouteBtn = document.getElementById("routeBtn");
+  if (mapRouteBtn) {
+    mapRouteBtn.addEventListener("click", handleMapRoute);
+  }
+
+  // Tombol route di modal
+  const modalRouteBtn = document.getElementById("modalRouteBtn");
+  if (modalRouteBtn) {
+    modalRouteBtn.addEventListener("click", handleModalRoute);
+  }
+
+  // Clean up mini map saat modal ditutup
+  const officeModal = document.getElementById("officeModal");
+  if (officeModal) {
+    officeModal.addEventListener("hidden.bs.modal", function () {
+      if (window.miniMap) {
+        window.miniMap.remove();
+        window.miniMap = null;
+      }
+    });
+  }
+});
 
 // Fungsi untuk menampilkan modal rute
 function showRouteModal() {
@@ -748,7 +1015,8 @@ function addOfficeMarker(office) {
 
   // Add click event
   marker.on("click", function () {
-    showOfficeDetails(office);
+    console.log("Marker diklik:", office.name);
+    window.showOfficeDetails(office); // 🔴 PANGGIL FUNGSI INI
   });
 
   return marker;
@@ -847,37 +1115,37 @@ function updateOfficeTable(offices) {
 }
 
 // Show office details in modal
-function showOfficeDetails(office) {
-  document.getElementById("officeModalTitle").textContent = office.name;
-  document.getElementById("officeAddress").textContent = office.address || "-";
-  document.getElementById("officePhone").textContent = office.phone || "-";
-  document.getElementById("officeEmail").textContent = office.email || "-";
-  document.getElementById("officeHours").textContent =
-    office.jam_operasional || "08:00 - 16:00";
+// function showOfficeDetails(office) {
+//   document.getElementById("officeModalTitle").textContent = office.name;
+//   document.getElementById("officeAddress").textContent = office.address || "-";
+//   document.getElementById("officePhone").textContent = office.phone || "-";
+//   document.getElementById("officeEmail").textContent = office.email || "-";
+//   document.getElementById("officeHours").textContent =
+//     office.jam_operasional || "08:00 - 16:00";
 
-  // Initialize mini map
-  const miniMap = L.map("officeMiniMap").setView(
-    [office.latitude, office.longitude],
-    15,
-  );
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
-    miniMap,
-  );
-  L.marker([office.latitude, office.longitude]).addTo(miniMap);
+//   // Initialize mini map
+//   const miniMap = L.map("officeMiniMap").setView(
+//     [office.latitude, office.longitude],
+//     15,
+//   );
+//   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+//     miniMap,
+//   );
+//   L.marker([office.latitude, office.longitude]).addTo(miniMap);
 
-  // Show modal
-  const modal = new bootstrap.Modal(document.getElementById("officeModal"));
-  modal.show();
+//   // Show modal
+//   const modal = new bootstrap.Modal(document.getElementById("officeModal"));
+//   modal.show();
 
-  // Clean up mini map when modal is hidden
-  document.getElementById("officeModal").addEventListener(
-    "hidden.bs.modal",
-    function () {
-      miniMap.remove();
-    },
-    { once: true },
-  );
-}
+//   // Clean up mini map when modal is hidden
+//   document.getElementById("officeModal").addEventListener(
+//     "hidden.bs.modal",
+//     function () {
+//       miniMap.remove();
+//     },
+//     { once: true },
+//   );
+// }
 
 // Locate office on main map
 function locateOffice(office) {
@@ -1000,44 +1268,6 @@ function resetFilters() {
   document.getElementById("provinceFilter").value = "";
   document.getElementById("officeTypeFilter").value = "";
   displayOffices(officeData);
-}
-
-// Get current location
-function getCurrentLocation() {
-  if (!navigator.geolocation) {
-    alert("Geolocation tidak didukung oleh browser Anda.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const { latitude, longitude } = position.coords;
-
-      // Remove previous location marker
-      if (currentLocationMarker) {
-        map.removeLayer(currentLocationMarker);
-      }
-
-      // Add new location marker
-      currentLocationMarker = L.marker([latitude, longitude], {
-        icon: L.divIcon({
-          className: "current-location-marker",
-          html: '<div style="width: 20px; height: 20px; background-color: #4285F4; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(66,133,244,0.5);"></div>',
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-        }),
-      })
-        .addTo(map)
-        .bindPopup("Lokasi Anda Saat Ini")
-        .openPopup();
-
-      // Center map on location
-      map.setView([latitude, longitude], 13);
-    },
-    (error) => {
-      alert("Tidak dapat mendapatkan lokasi Anda: " + error.message);
-    },
-  );
 }
 
 // Zoom to show all offices

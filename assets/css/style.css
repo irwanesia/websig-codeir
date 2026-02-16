@@ -49,6 +49,21 @@
   border: 1px solid #ddd;
 }
 
+/* Di style.css */
+#officeMiniMap {
+  height: 200px;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+}
+
+.modal-body .table-sm td {
+  padding: 0.5rem;
+}
+
+.modal-body .table-sm td:first-child {
+  width: 40%;
+  font-weight: 600;
+}
 /* Di assets/css/style.css */
 
 /* Pulse animation untuk lokasi saat ini */

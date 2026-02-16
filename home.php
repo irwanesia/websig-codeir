@@ -274,9 +274,14 @@ require_once 'includes/header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="getRouteBtn">
+                <!-- Pastikan tombol di modal menggunakan onclick dengan benar -->
+                <!-- Di modal, pastikan ID-nya modalRouteBtn -->
+                <button class="btn btn-primary" id="modalRouteBtn" onclick="window.handleModalRouteClick()">
                     <i class="bi bi-signpost me-2"></i>Cari Rute
                 </button>
+                <!-- <button class="btn btn-primary" onclick="window.handleModalRouteClick()">
+                    <i class="bi bi-signpost me-2"></i>Cari Rute
+                </button> -->
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
